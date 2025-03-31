@@ -1,0 +1,6 @@
+---
+vector_version: "0.42.0"
+vector_checksum: "b8eb6b2cc754ac6078e1d091528cdb266d4d68b980c9a0a1915a6bf79af7ffe6"  
+vector_install_dir: "/opt/vector"
+vector_config_dir: "/etc/vector"
+vector_data_dir: "/var/lib/vector"
