@@ -1,2 +1,3 @@
 ---
-# vars file for vector-role
+VECTOR_USER: "root"
+VECTOR_GROUP: "root"

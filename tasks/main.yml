@@ -1,43 +1,53 @@
 ---
-- name: Create Vector directories
+- name: Make dirs
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
     mode: '0755'
   with_items:
-    - "{{ vector_install_dir }}"
-    - "{{ vector_config_dir }}"
-    - "{{ vector_data_dir }}"
+    - "/home/shibegora/vector"
+    - "{{ VECTOR_CONFIG }}"
+    - "{{ VECTOR_DATA_DIR }}"
+  tags:
+    - vector
 
-- name: Download Vector
+- name: Get vector tar.gz
   ansible.builtin.get_url:
-    url: "https://packages.timber.io/vector/{{ vector_version }}/vector-{{ vector_version }}-x86_64-unknown-linux-musl.tar.gz"
-    dest: "/tmp/vector-{{ vector_version }}.tar.gz"
-    checksum: "sha256:{{ vector_checksum }}"
+    url: "https://packages.timber.io/vector/0.42.0/vector-0.42.0-x86_64-unknown-linux-musl.tar.gz"
+    dest: "/home/shibegora/"
+  tags:
+    - vector
 
-- name: Extract Vector
+- name: Extract vector tar.gz
   ansible.builtin.unarchive:
-    src: "/tmp/vector-{{ vector_version }}.tar.gz"
-    dest: "{{ vector_install_dir }}"
-    remote_src: yes
+    src: "/home/shibegora/vector-0.42.0-x86_64-unknown-linux-musl.tar.gz"
+    dest: "/home/shibegora/vector"
+    remote_src: true
+  tags:
+    - vector
 
-- name: Install Vector binary
+- name: Copy vector bin
   ansible.builtin.copy:
-    src: "{{ vector_install_dir }}/vector-{{ vector_version }}/bin/vector"
-    dest: "/usr/local/bin/vector"
+    src: /home/shibegora/vector/vector-x86_64-unknown-linux-musl/bin/vector
+    dest: /usr/bin/
     mode: '0755'
-    remote_src: yes
+    remote_src: true
+  tags:
+    - vector
 
-- name: Deploy Vector config
+- name: Copy *.yaml file
   ansible.builtin.template:
-    src: vector.yaml.j2
-    dest: "{{ vector_config_dir }}/vector.yaml"
-    mode: '0644'
-  notify: restart vector
+    src: "{{ role_path }}/templates/vector.yaml.j2"
+    dest: "{{ VECTOR_CONFIG }}/vector.yaml"
+    mode: '0755'
+  tags:
+    - vector
 
-- name: Deploy systemd service
+- name: Copy *.service file
   ansible.builtin.template:
-    src: vector.service.j2
+    src: "{{ role_path }}/templates/vector.service.j2"
     dest: /etc/systemd/system/vector.service
-    mode: '0644'
-  notify: restart vector
+    mode: '0664'
+  notify: Start vector service
+  tags:
+    - vector
